@@ -1,0 +1,1 @@
+const { File } = require('megajs'); async function uploadToMega(filePath) { try { const file = File.fromFile(filePath, { email: process.env.MEGA_EMAIL, password: process.env.MEGA_PASSWORD, }); await file.upload(); return file.downloadUrl; } catch (error) { console.error('Mega upload failed:', error); throw error; } } module.exports = uploadToMega;

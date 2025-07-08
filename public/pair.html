@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phone Number Pairing - ANCORE</title>
+  <link rel="stylesheet" href="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous">
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f5f8ff;
+      color: #333;
+      transition: background 0.3s, color 0.3s;
+      margin: 0;
+      padding: 20px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .dark-mode {
+      background: #121212 url('https://files.catbox.moe/wp6q5l.jpeg') no-repeat center/cover;
+      filter: brightness(0.8);
+      color: #fff;
+    }
+    .container {
+      text-align: center;
+      max-width: 800px;
+      flex-grow: 1;
+    }
+    .logo {
+      max-width: 150px;
+      margin-bottom: 20px;
+    }
+    h1 {
+      font-size: 2.5em;
+      margin-bottom: 20px;
+    }
+    input[type="text"] {
+      padding: 10px;
+      font-size: 1em;
+      width: 100%;
+      max-width: 300px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      margin-bottom: 10px;
+    }
+    .dark-mode input[type="text"] {
+      background: #333;
+      color: #fff;
+      border-color: #666;
+    }
+    #pairStatus {
+      font-size: 0.9em;
+      margin-bottom: 20px;
+      min-height: 20px;
+    }
+    .btn {
+      background: #0d6efd;
+      color: #fff;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 5px;
+      font-size: 1.2em;
+      cursor: pointer;
+      transition: background 0.3s, transform 0.2s;
+    }
+    .btn:hover {
+      background: #0051cc;
+      transform: scale(1.05);
+    }
+    #music-control {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #0d6efd;
+      color: #fff;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: move;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+    #music-control:hover {
+      background: #0051cc;
+    }
+    footer {
+      margin-top: 20px;
+      font-family: monospace;
+      font-size: 0.9em;
+      color: #666;
+    }
+    .dark-mode footer {
+      color: #aaa;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <img src="https://files.catbox.moe/kt8t1b.jpeg" alt="ANCORE Logo" class="logo">
+    <h1>Pair with Phone Number</h1>
+    <input type="text" id="phoneNumber" placeholder="Enter phone number (e.g., +2348036869669)">
+    <div id="pairStatus"></div>
+    <button id="pairBtn" class="btn">Get Pairing Code</button>
+  </div>
+  <audio id="background-music" src="https://od.lk/s/MjZfNzU0MzQ2ODdf/AUD-20250625-WA0423.mp3" loop></audio>
+  <div id="music-control" draggable="true"><i class="fas fa-play"></i></div>
+  <footer>© 2025 ANCORE — Made by Corex with 💙</footer>
+
+  <script>
+    const phoneNumberInput = document.getElementById('phoneNumber');
+    const pairStatus = document.getElementById('pairStatus');
+    const pairBtn = document.getElementById('pairBtn');
+    const musicControl = document.getElementById('music-control');
+    const audio = document.getElementById('background-music');
+    let isDragging = false;
+
+    pairBtn.addEventListener('click', async () => {
+      const phoneNumber = phoneNumberInput.value;
+      if (!phoneNumber || !/^\+\d{10,15}$/.test(phoneNumber)) {
+        pairStatus.textContent = '❌ Invalid phone number. Use format: +2348036869669';
+        return;
+      }
+      pairStatus.textContent = '⏳ Generating pairing code...';
+      try {
+        const response = await fetch(`/pair?phoneNumber=${encodeURIComponent(phoneNumber)}`);
+        const data = await response.json();
+        if (data.code) {
+          pairStatus.textContent = `✅ Pairing Code: ${data.code}`;
+        } else {
+          pairStatus.textContent = '❌ Failed to generate pairing code. Try again.';
+        }
+      } catch (error) {
+        pairStatus.textContent = '⚠️ Couldn\'t generate pairing code. Try again.';
+      }
+    });
+
+    musicControl.addEventListener('click', () => {
+      if (audio.paused) {
+        audio.play();
+        musicControl.innerHTML = '<i class="fas fa-pause"></i>';
+      } else {
+        audio.pause();
+        musicControl.innerHTML = '<i class="fas fa-play"></i>';
+      }
+    });
+
+    musicControl.addEventListener('dragstart', (e) => {
+      isDragging = true;
+      e.dataTransfer.setData('text/plain', null);
+    });
+
+    document.addEventListener('dragover', (e) => {
+      e.preventDefault();
+    });
+
+    document.addEventListener('drop', (e) => {
+      if (isDragging) {
+        musicControl.style.left = `${e.clientX - 20}px`;
+        musicControl.style.top = `${e.clientY - 20}px`;
+        isDragging = false;
+      }
+    });
+
+    const modeToggle = localStorage.getItem('theme') || 'light';
+    if (modeToggle === 'dark') {
+      document.body.classList.add('dark-mode');
+    }
+  </script>
+</body>
+</html>
